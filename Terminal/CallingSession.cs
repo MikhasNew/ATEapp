@@ -10,6 +10,8 @@ namespace ATEapp
         public event EventHandler<CallingSessionEventArgs> CallingSessionClosed;
         public event EventHandler<CallingSessionEventArgs> CallingSessionTerminated;
 
+        public int PortNumber { get; }
+        public int CalledNumber { get; }
         public DateTime Date { get; protected set; }
         public Stopwatch Timer;
         public Guid SesionKey { get; private set; }
@@ -23,7 +25,7 @@ namespace ATEapp
        
         public void StartCallingSession()
         {
-            Date = DateTime.Today.Date;
+            Date = DateTime.Now;
             Timer = new Stopwatch();
             IsStarted = true;
             Timer.Start();
@@ -42,8 +44,7 @@ namespace ATEapp
         {
             SesionKey = key;
         }
-        public int PortNumber { get; }
-        public int CalledNumber { get; }
+       
 
         internal void TerminateCallingSession()
         {

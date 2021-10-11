@@ -21,13 +21,12 @@ namespace ATEapp
         {
             ConsoleColorList = Enum.GetValues<ConsoleColor>().ToList();
             ATEBillingSystem = new BillingSystem();
-
-            
-        }
+       }
 
         public Account GreateContract(int clientId, AccountTypes accountTyp)
         {
             var account = new Account(clientId, accountTyp);
+            
             ATEBillingSystem.AddAccount(account);
             return account;
         }
@@ -38,6 +37,7 @@ namespace ATEapp
             terminalPort.СhangePortStateEvent += TerminalPort_СhangePortStateEventAsync;
             terminal.AddPort(terminalPort);
             Ports.Add(terminal.TerminalPort.PortNumber, terminalPort);
+            account.SetPortNumber(terminal.TerminalPort.PortNumber);
 
             TerminalIterator++;
             return terminal;

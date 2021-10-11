@@ -25,6 +25,7 @@ namespace ATEapp
         public List<CallingSession> BillingSystemHistory { get; }
 
         private List<Account> Accounts = new List<Account>();
+
         public BillingSystem()
         {
             currentCallingSessions = new ConcurrentDictionary<Guid, CallingSession>();
@@ -33,7 +34,9 @@ namespace ATEapp
         internal void AddAccount(Account account)
         {
             if (!Accounts.Any(a => a.ClientId == account.ClientId))
+            {
                 Accounts.Add(account);
+            }
         }
 
         internal void AddCurrentCallingSessions(CallingSession cs)
@@ -56,11 +59,39 @@ namespace ATEapp
         {
             CallingSession cs = (CallingSession)sender;
             BillingSystemHistory.Add(cs);
+            WriteOffSumm(e);
+
             CallingSession temp;                                                
             currentCallingSessions.TryRemove(cs.SesionKey, out temp);
         }
-
         
+        private void WriteOffSumm(CallingSessionEventArgs e)
+        {
+            var ac = Accounts.First(a => a.PortNumber == e.PortNumber);
+            int callingTime = (int)e.TimeSession.TotalMinutes;
+            if (callingTime == 0)
+                callingTime++;
+            decimal coe;
+            switch (ac.AccountTyp)
+            {
+                case AccountTypes.Base:
+                    coe=0.4m;
+                    break;
+                case AccountTypes.Gold:
+                    coe = 0.6m;
+                    break;
+                case AccountTypes.Silver:
+                    coe = 0.5m;
+                    break;
+                default:
+                    coe = 0.6m;
+                    break;
+            }
+            decimal summ = callingTime*coe*0.1m;
+            ac.WriteOffSumm(summ);
+
+
+        }
 
     }
 }
