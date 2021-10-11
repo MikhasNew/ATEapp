@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ATEapp
 {
     public class Account
     {
+        public delegate void GetReporttHandler(object sender,  AccauntEvenArgs<List<CallingSession>> accauntEvenArgs);
+       
+        public event GetReporttHandler GetReporttEvent;
         public DateTime ChangeTariffDate { get; private set; }
         public decimal Summ { get; private set; }
         public AccountTypes AccountTyp { get; private set; }
@@ -60,6 +65,40 @@ namespace ATEapp
             else
                 Console.WriteLine($"Dear customer {ClientId}, the tariff can be changed every 30 days," +
                     $" the last shift {ChangeTariffDate}. \r\nPlease wait.\r\n");
+
+        }
+        public void GetReport(SortBy sortBy)
+        {
+
+            var data = new AccauntEvenArgs<List<CallingSession>>(AccauntEventType.GetReport, this.PortNumber, null);
+            GetReporttEvent?.Invoke(this, data);
+            List<CallingSession> SortedList;
+            switch (sortBy)
+            {
+                case SortBy.Date:
+                    SortedList = data.ResponseData.OrderBy(i => i.Date).ToList();
+                    break;
+                case SortBy.Time:
+                    SortedList = data.ResponseData.OrderBy(i => i.Timer.Elapsed.TotalMilliseconds).ToList();
+                    break;
+                case SortBy.Cost:
+                    SortedList = data.ResponseData.OrderBy(i => i.Cost).ToList();
+                    break;
+                case SortBy.CalledNumber:
+                    SortedList = data.ResponseData.OrderByDescending(i => i.CalledNumber).ToList();
+                    break;
+                    
+                default:
+                    SortedList = data.ResponseData;
+                    break;
+            }
+
+            Console.WriteLine($"\r\n  {"Date connecting"}         {"duration "}    {"called subscriber"}  {"cost"}");
+            foreach (CallingSession item in SortedList)
+            {
+                 Console.WriteLine($"  {item.Date:dd MMMM yyyy}          {item.Timer.Elapsed:\\:mm\\:ss}         {item.CalledNumber}      {item.Cost}");
+            }
+
 
         }
     }

@@ -41,7 +41,6 @@ namespace ATEapp
 
             TerminalIterator++;
             return terminal;
-
         }
 
         private async Task TerminalPort_СhangePortStateEventAsync(object sender, PortEventArgs e)

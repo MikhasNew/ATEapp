@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 
 namespace ATEapp
 {
-    internal class CallingSession
+    public class CallingSession
     {
         public event EventHandler<CallingSessionEventArgs> CallingSessionClosed;
         public event EventHandler<CallingSessionEventArgs> CallingSessionTerminated;
 
         public int PortNumber { get; }
         public int CalledNumber { get; }
+        public decimal Cost { get; protected set; }
         public DateTime Date { get; protected set; }
         public Stopwatch Timer;
         public Guid SesionKey { get; private set; }
@@ -29,8 +30,7 @@ namespace ATEapp
             Timer = new Stopwatch();
             IsStarted = true;
             Timer.Start();
-            // Thread.Sleep(40000);
-            //StopCallingSession();
+           
         }
         public CallingSession StopCallingSession()
         {
@@ -44,7 +44,10 @@ namespace ATEapp
         {
             SesionKey = key;
         }
-       
+        public void SetSesionCost(decimal suum)
+        {
+            Cost = suum;
+        }
 
         internal void TerminateCallingSession()
         {

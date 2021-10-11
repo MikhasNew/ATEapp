@@ -47,11 +47,13 @@ namespace ATEapp
         {
             ShowTerminalMessage("consumer turn off the terminal");
             TerminalPort.SetPortState(PortState.Bloked);
+            TerminalPort.ATEMessageEvent -= TerminalPort_ATEMessageEvent;
         }
         public void TurnOn()
         {
             ShowTerminalMessage("consumer turn on the terminal");
             TerminalPort.SetPortState(PortState.Open);
+            TerminalPort.ATEMessageEvent += TerminalPort_ATEMessageEvent;
         }
 
         private void TerminalPort_СhangePortStateEvent(object sender, PortEventArgs e)

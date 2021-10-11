@@ -2,7 +2,7 @@
 
 namespace ATEapp
 {
-     class CallingSessionEventArgs 
+     public class CallingSessionEventArgs 
     {
         public DateTime DateSession { get; }
         public TimeSpan TimeSession { get; }

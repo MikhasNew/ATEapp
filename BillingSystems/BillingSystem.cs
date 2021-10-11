@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace ATEapp
 {
-    class BillingSystem
+     class BillingSystem
     {
-        
+
         private ConcurrentDictionary<Guid, CallingSession> currentCallingSessions;
         public IEnumerable<KeyValuePair<Guid, CallingSession>> CurrentCallingSessions
         {
             get
             {
-                 foreach (var cs in currentCallingSessions)
+                foreach (var cs in currentCallingSessions)
                 {
                     yield return cs;
                 }
@@ -35,10 +35,17 @@ namespace ATEapp
         {
             if (!Accounts.Any(a => a.ClientId == account.ClientId))
             {
+                account.GetReporttEvent += Account_AccauntEvent;
                 Accounts.Add(account);
             }
         }
 
+        private void Account_AccauntEvent(object sender, AccauntEvenArgs<List<CallingSession>> accauntEvenArgs)
+        {
+            accauntEvenArgs.ResponseData = BillingSystemHistory.Where(cs => cs.PortNumber == accauntEvenArgs.PortNumber).ToList();
+        }
+
+     
         internal void AddCurrentCallingSessions(CallingSession cs)
         {
             var key = Guid.NewGuid();
@@ -51,7 +58,7 @@ namespace ATEapp
         private void Cs_CallingSessionTerminated(object sender, CallingSessionEventArgs e)
         {
             CallingSession cs = (CallingSession)sender;
-            CallingSession temp;                                                
+            CallingSession temp;
             currentCallingSessions.TryRemove(cs.SesionKey, out temp);
         }
 
@@ -59,23 +66,23 @@ namespace ATEapp
         {
             CallingSession cs = (CallingSession)sender;
             BillingSystemHistory.Add(cs);
-            WriteOffSumm(e);
+            WriteOffSumm(cs);
 
-            CallingSession temp;                                                
+            CallingSession temp;
             currentCallingSessions.TryRemove(cs.SesionKey, out temp);
         }
-        
-        private void WriteOffSumm(CallingSessionEventArgs e)
+
+        private void WriteOffSumm(CallingSession e)
         {
             var ac = Accounts.First(a => a.PortNumber == e.PortNumber);
-            int callingTime = (int)e.TimeSession.TotalMinutes;
+            int callingTime = (int)e.Timer.Elapsed.TotalMinutes;
             if (callingTime == 0)
                 callingTime++;
             decimal coe;
             switch (ac.AccountTyp)
             {
                 case AccountTypes.Base:
-                    coe=0.4m;
+                    coe = 0.4m;
                     break;
                 case AccountTypes.Gold:
                     coe = 0.6m;
@@ -87,11 +94,14 @@ namespace ATEapp
                     coe = 0.6m;
                     break;
             }
-            decimal summ = callingTime*coe*0.1m;
+            decimal summ = callingTime * coe * 0.1m;
+            e.SetSesionCost(summ);
             ac.WriteOffSumm(summ);
 
 
         }
+
+
 
     }
 }

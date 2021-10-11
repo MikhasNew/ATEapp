@@ -34,14 +34,23 @@ namespace ATEapp
             Thread.Sleep(1000);
             client3.Terminal.GreateOutCalling(new Random(11111111).Next());
             
-            Thread.Sleep(1000);
+            Thread.Sleep(10000);
             client2.Terminal.ClouseCalling();
            
             Thread.Sleep(1000);
-            client3.Terminal.GreateOutCalling(new Random(11111111).Next());
-            Thread.Sleep(10000);
+            client1.Terminal.GreateOutCalling(new Random(33333333).Next());
+            Thread.Sleep(1000);
             client1.Terminal.ClouseCalling();
+
+
+
+
             client1.Account.GetBalance();
+
+            client1.Account.GetReport(SortBy.Cost);
+            client1.Account.GetReport(SortBy.CalledNumber);
+            client1.Account.GetReport(SortBy.Date);
+
             Console.ReadLine();
         }
     }
