@@ -93,12 +93,9 @@ namespace ATEapp
             }
             Console.WriteLine($"The report consumer {this.PortNumber}");
 
-            // Console.Write("{0, 12}| {1, 8}| {2, 12}| {3}", "Date connecting", "duration", "called subscriber", "cost");
             Console.WriteLine("Date connecting\t\tduration\tcalled subscriber\tcost");
             foreach (CallingSession item in SortedList)
             {
-               // Console.WriteLine($"{ item.Date:dd MMMM yyyy, 12}|  {item.Timer.Elapsed:\\:mm\\:ss, 8}| {item.CalledNumber, 12}| {item.Cost, 7}");
-
                 Console.WriteLine($"{item.Date:dd MMMM yyyy}\t\t{item.Timer.Elapsed:\\:mm\\:ss}\t\t{item.CalledNumber}\t\t{item.Cost}");
             }
 
