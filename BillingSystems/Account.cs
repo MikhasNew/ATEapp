@@ -7,8 +7,8 @@ namespace ATEapp
     public class Account
     {
         public delegate void GetReporttHandler(object sender,  AccauntEvenArgs<List<CallingSession>> accauntEvenArgs);
-       
         public event GetReporttHandler GetReporttEvent;
+        
         public DateTime ChangeTariffDate { get; private set; }
         public decimal Summ { get; private set; }
         public AccountTypes AccountTyp { get; private set; }
@@ -85,20 +85,20 @@ namespace ATEapp
                     SortedList = data.ResponseData.OrderBy(i => i.Cost).ToList();
                     break;
                 case SortBy.CalledNumber:
-                    SortedList = data.ResponseData.OrderByDescending(i => i.CalledNumber).ToList();
+                    SortedList = data.ResponseData.OrderBy(i => i.CalledNumber).ToList();
                     break;
-                    
                 default:
                     SortedList = data.ResponseData;
                     break;
             }
-
-            Console.WriteLine($"\r\n  {"Date connecting"}         {"duration "}    {"called subscriber"}  {"cost"}");
+            Console.WriteLine($"The report consumer {this.PortNumber}");
+            Console.WriteLine($"{"Date connecting"}         {"duration "}    {"called subscriber"}    {"cost"}");
             foreach (CallingSession item in SortedList)
             {
-                 Console.WriteLine($"  {item.Date:dd MMMM yyyy}          {item.Timer.Elapsed:\\:mm\\:ss}         {item.CalledNumber}      {item.Cost}");
+                 Console.WriteLine($"{item.Date:dd MMMM yyyy}          {item.Timer.Elapsed:\\:mm\\:ss}         {item.CalledNumber}      {item.Cost}");
             }
 
+            Console.WriteLine($"\r\n");
 
         }
     }

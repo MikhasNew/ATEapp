@@ -6,66 +6,66 @@ using System.Threading.Tasks;
 
 namespace ATEapp
 {
-    class Terminal
+    class Terminal : IMessager
     {
-        public ConsoleColor ConsoleColorTerminal { get; }
+        public ConsoleColor TextColor { get; }
+        public Port IdObject { get; private set; }
         public Port TerminalPort { get; private set; }
 
-        public Terminal( ConsoleColor consoleColor)
+        public Terminal(ConsoleColor consoleColor)
         {
-            ConsoleColorTerminal = consoleColor;
+            TextColor = consoleColor;
         }
         public void AddPort(Port terminalPort)
         {
+
             if (TerminalPort == null)
+            {
                 TerminalPort = terminalPort;
-            //TerminalPort.СhangePortStateEvent += TerminalPort_СhangePortStateEvent;
-            TerminalPort.ATEMessageEvent += TerminalPort_ATEMessageEvent;
+                IdObject = TerminalPort;
+                TerminalPort.ATEMessageEvent += TerminalPort_ATEMessageEvent;
+            }
         }
 
         public void GreateOutCalling(int number)
         {
-            ShowTerminalMessage($"Сonsumer calling to {number}");
-            TerminalPort.SetPortState(PortState.OutCall, calledNumber:number) ;
+            Messager.ShowMessage(this, $"Сonsumer calling to {number}");
+            TerminalPort.SetPortState(PortState.OutCall, calledNumber: number);
         }
         public void AcceptCalling(int number)
         {
-            ShowTerminalMessage("The yes button is pressed, confirmation of connection...");
+            Messager.ShowMessage(this, "The yes button is pressed, confirmation of connection...");
             TerminalPort.SetPortState(PortState.InCall, number);
         }
         public void ClouseCalling()
         {
-            ShowTerminalMessage($"Сonnection terminated.");
+            Messager.ShowMessage(this, $"Сonnection terminated.");
             TerminalPort.SetPortState(PortState.Open);
         }
         public void RejectCalling()
         {
-            ShowTerminalMessage("consumer reject a calling");
+            Messager.ShowMessage(this, "consumer reject a calling");
             TerminalPort.SetPortState(PortState.Open);
         }
         public void TurnOff()
         {
-            ShowTerminalMessage("consumer turn off the terminal");
+            Messager.ShowMessage(this, "consumer turn OFF the terminal");
             TerminalPort.SetPortState(PortState.Bloked);
             TerminalPort.ATEMessageEvent -= TerminalPort_ATEMessageEvent;
         }
         public void TurnOn()
         {
-            ShowTerminalMessage("consumer turn on the terminal");
+            Messager.ShowMessage(this, "consumer turn ON the terminal");
             TerminalPort.SetPortState(PortState.Open);
             TerminalPort.ATEMessageEvent += TerminalPort_ATEMessageEvent;
         }
-
-        private void TerminalPort_СhangePortStateEvent(object sender, PortEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        
         private void TerminalPort_ATEMessageEvent(object sender, PortEventArgs e)
         {
             if (e.PortState == PortState.InCall)
             {
-                ShowTerminalMessage($"Incoming call from {e.CalledNumber}. \r\n" +
-                    $"Press 'Y' to accept.");
+                Messager.ShowMessage(this, $"Incoming call from {e.CalledNumber}. \r\n" +
+                                           $"Press 'Y' to accept.");
                 if (Console.ReadKey(true).Key == ConsoleKey.Y)
                 {
                     AcceptCalling(e.CalledNumber);
@@ -75,23 +75,14 @@ namespace ATEapp
                     RejectCalling();
                 }
             }
-            if (e.PortState == PortState.Open && (TerminalPort.PortState == PortState.OutCall 
+            if (e.PortState == PortState.Open && (TerminalPort.PortState == PortState.OutCall
                 || TerminalPort.PortState == PortState.InCall))
             {
                 ClouseCalling();
             }
 
         }
-
-        private void ShowTerminalMessage(string message)
-        {
-            var fc = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColorTerminal;
-            Console.WriteLine($"Terminal {this.TerminalPort.PortNumber} infomation: {message}");
-            Console.ForegroundColor = fc;
-        }
-
-
+        
     }
 }
 

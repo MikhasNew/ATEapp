@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATEapp
 {
-    class Port
+    class Port : IMessager
     {
         public delegate Task EventHandler(object sender, PortEventArgs e);
         public event EventHandler СhangePortStateEvent;
@@ -14,19 +14,22 @@ namespace ATEapp
        // public event EventHandler<PortEventArgs> СhangePortStateEvent;
         public event EventHandler<PortEventArgs> ATEMessageEvent;
 
-        public ConsoleColor ConsoleColorPort { get; }
+        public ConsoleColor TextColor { get; }
+        public Port TerminalPort { get; }
+        
         public PortState PortState { get; private set; }
         public int PortNumber { get; }
 
         public Port(int portNumber, ConsoleColor consoleColor = default)
         {
-            ConsoleColorPort = consoleColor;
+            TerminalPort = this;
+            TextColor = consoleColor;
             PortState = PortState.Open;
             PortNumber = portNumber;
         }
         protected virtual void SetPortStateOn(PortEventArgs e)
         {
-            ShowPortMessage($"Port checked to {e.PortState}");
+            Messager.ShowMessage(this,$"Port checked to {e.PortState}");
             PortState = e.PortState;
             СhangePortStateEvent?.Invoke(this, e);
         }
@@ -46,13 +49,6 @@ namespace ATEapp
         {
             return PortState;
         }
-
-        private void ShowPortMessage(string message)
-        {
-            var fc = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColorPort;
-            Console.WriteLine($"Port {this.PortNumber} infomation: {message}");
-            Console.ForegroundColor = fc;
-        }
+        
     }
 }

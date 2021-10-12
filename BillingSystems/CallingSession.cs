@@ -20,6 +20,8 @@ namespace ATEapp
 
         public CallingSession(int portNumber, int calledNumber)
         {
+            Date = new DateTime();
+            Timer = new Stopwatch();
             PortNumber = portNumber;
             CalledNumber = calledNumber;
         }
@@ -27,7 +29,6 @@ namespace ATEapp
         public void StartCallingSession()
         {
             Date = DateTime.Now;
-            Timer = new Stopwatch();
             IsStarted = true;
             Timer.Start();
            
@@ -36,7 +37,7 @@ namespace ATEapp
         {
             IsStarted = false;
             Timer.Stop();
-            Console.WriteLine("Callinc session closed.....");
+            //Console.WriteLine("Callinc session closed.....");
             CallingSessionClosed?.Invoke(this, new CallingSessionEventArgs(Date, Timer.Elapsed, PortNumber, CalledNumber, SesionKey));
             return this;
         }
@@ -48,7 +49,6 @@ namespace ATEapp
         {
             Cost = suum;
         }
-
         internal void TerminateCallingSession()
         {
             CallingSessionTerminated?.Invoke(this, new CallingSessionEventArgs(Date, Timer.Elapsed, PortNumber, CalledNumber, SesionKey));

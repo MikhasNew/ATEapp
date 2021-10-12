@@ -7,31 +7,38 @@ using System.Threading.Tasks;
 
 namespace ATEapp
 {
-    class ATE
+    class ATE : IMessager
     {
+        public ConsoleColor TextColor { get; }
+        public Port TerminalPort { get; }
+
+
         private List<ConsoleColor> ConsoleColorList = new List<ConsoleColor>();
         private Dictionary<int, Port> Ports = new Dictionary<int, Port>();
 
         private BillingSystem ATEBillingSystem;
-        
-
-        private int TerminalIterator = 7;
+        private int TerminalIterator = 1;
 
         public ATE()
         {
+            TextColor = ConsoleColor.Yellow;
+            TerminalPort = new Port(0, ConsoleColor.Green);
+            
             ConsoleColorList = Enum.GetValues<ConsoleColor>().ToList();
             ATEBillingSystem = new BillingSystem();
-       }
+        }
 
         public Account GreateContract(int clientId, AccountTypes accountTyp)
         {
             var account = new Account(clientId, accountTyp);
-            
             ATEBillingSystem.AddAccount(account);
             return account;
         }
         public Terminal GreateTerminal(Account account)
         {
+            if (TerminalIterator > 12)
+                TerminalIterator = 1;
+
             var terminal = new Terminal(ConsoleColorList[TerminalIterator]);
             var terminalPort = new Port(new Random(account.ClientId).Next(), ConsoleColorList[TerminalIterator]);
             terminalPort.СhangePortStateEvent += TerminalPort_СhangePortStateEventAsync;
@@ -51,14 +58,14 @@ namespace ATEapp
             {
                 if (Ports[e.CalledNumber].PortState == PortState.Open)
                 {
-                    ShowAtsMessage($"Connection {initiator.PortNumber} to {e.CalledNumber}...");
-                    //ATEBillingSystem.CurrentCallingSessions.TryAdd(Guid.NewGuid(), new CallingSession(initiator.PortNumber, e.CalledNumber));
+                   Messager.ShowMessage(this,$"Connection {initiator.PortNumber} to {e.CalledNumber}...");
+                   
                     ATEBillingSystem.AddCurrentCallingSessions(new CallingSession(initiator.PortNumber, e.CalledNumber));
                     Ports[e.CalledNumber].SetATEComand(PortState.InCall, initiator.PortNumber);
                 }
                 else if (Ports[e.CalledNumber].PortState != PortState.Open)
                 {
-                    ShowAtsMessage("The line is engaged...");
+                    Messager.ShowMessage(this, $"The line is engaged...");
                     Ports[initiator.PortNumber].SetATEComand(PortState.Open);
                 }
             }
@@ -66,8 +73,8 @@ namespace ATEapp
             {
                 var callingSession = ATEBillingSystem.CurrentCallingSessions.Where(session => session.Value.CalledNumber == initiator.PortNumber
                                                                       && session.Value.PortNumber == e.CalledNumber).FirstOrDefault();
-                ShowAtsMessage($"Connection {callingSession.Value.PortNumber} to {callingSession.Value.CalledNumber} is ready.");
-                await Task.Run(() => callingSession.Value.StartCallingSession()) ;
+                Messager.ShowMessage(this, $"Connection {callingSession.Value.PortNumber} to {callingSession.Value.CalledNumber} is ready.\r\n");
+                await Task.Run(() => callingSession.Value.StartCallingSession());
             }
             else if (e.PortState == PortState.Open)
             {
@@ -78,45 +85,26 @@ namespace ATEapp
                     if (callingSession.Value != null && callingSession.Value.IsStarted)
                     {
                         callingSession.Value.StopCallingSession();
-                       // ATEBillingSystem.BillingSystemHistory.Add(callingSession.Value);//
-                       // CallingSession temp;                                                //
-                       //ATEBillingSystem.CurrentCallingSessions.Remove(callingSession.Key, out temp);//
-                        
+                        Messager.ShowMessage(this, $"Connection {callingSession.Value.PortNumber} to {callingSession.Value.CalledNumber} is cloused.");
+
                         if (callingSession.Value.CalledNumber == initiator.PortNumber)
                         {
                             Ports[callingSession.Value.PortNumber].SetATEComand(PortState.Open);
                         }
                         else
                             Ports[callingSession.Value.CalledNumber].SetATEComand(PortState.Open);
-
-                        ShowAtsMessage($"Connection {callingSession.Value.PortNumber} to {callingSession.Value.CalledNumber} is cloused.");
+                        
                     }
                     else
                     {
                         callingSession.Value.TerminateCallingSession();
+                        Messager.ShowMessage(this, $"Connection {callingSession.Value.PortNumber} to {callingSession.Value.CalledNumber} is cloused.");
                         Ports[callingSession.Value.PortNumber].SetATEComand(PortState.Open);
-                       //CallingSession temp;
-                        //ATEBillingSystem.CurrentCallingSessions.Remove(callingSession.Key, out temp);
-                        
-                    }
-
+                     }
+                    Console.WriteLine($"\r\n");
                 }
             }
         }
-
-
-
-
-
-
-
-
-        private void ShowAtsMessage(string message)
-{
-    var fc = Console.ForegroundColor;
-    Console.ForegroundColor = ConsoleColor.DarkRed;
-    Console.WriteLine($"ATS information: " + message);
-    Console.ForegroundColor = fc;
-}
+        
     }
 }
